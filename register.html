@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DATA INJECTION | KERNEL V2</title>
+    <style>
+        :root {
+            --primary: #00ff41;
+            --bg-dark: #050505;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--primary);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: radial-gradient(circle, #001a00 0%, #000 100%);
+        }
+
+        .entry-box {
+            width: 550px;
+            padding: 30px;
+            border: 1px solid var(--primary);
+            background: rgba(0, 15, 0, 0.95);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+            position: relative;
+        }
+
+        h2 { text-align: center; letter-spacing: 5px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-top: 0; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+
+        .field { margin-bottom: 15px; }
+        .full-width { grid-column: span 2; }
+
+        label { display: block; font-size: 11px; margin-bottom: 5px; color: #888; text-transform: uppercase; }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background: #000;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            outline: none;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        input:focus { box-shadow: 0 0 10px var(--primary); }
+
+        .btn-save {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            text-transform: uppercase;
+            transition: 0.3s;
+            letter-spacing: 2px;
+        }
+
+        .btn-save:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        #status-log {
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: center;
+            min-height: 20px;
+            padding: 10px;
+            border: 1px dashed transparent;
+        }
+
+        .success-flash {
+            border: 1px solid var(--primary) !important;
+            background: rgba(0, 255, 65, 0.1);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="entry-box">
+        <h2>DATA_INJECTION_V2</h2>
+        
+        <div class="form-grid">
+            <div class="field full-width">
+                <label>FULL NAME</label>
+                <input type="text" id="entryName" placeholder="Enter Full Name">
+            </div>
+
+            <div class="field">
+                <label>WHATSAPP NO</label>
+                <input type="text" id="entryWA" placeholder="07XXXXXXXX">
+            </div>
+
+            <div class="field">
+                <label>DATE OF BIRTH</label>
+                <input type="date" id="entryDOB">
+            </div>
+
+            <div class="field full-width">
+                <label>RESIDENTIAL ADDRESS</label>
+                <input type="text" id="entryAddress" placeholder="No, Street, City">
+            </div>
+
+            <div class="field full-width">
+                <label>SCHOOL / INSTITUTE</label>
+                <input type="text" id="entrySchool" placeholder="Enter Educational Institute">
+            </div>
+
+            <div class="field">
+                <label>STATUS</label>
+                <select id="entryStatus">
+                    <option value="Student">Student</option>
+                    <option value="Adult">Adult</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>ACCESS PRIVILEGE</label>
+                <select id="entryAccess">
+                    <option value="no">NO ACCESS</option>
+                    <option value="yes">YES ACCESS</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn-save" id="btnSave">Execute Data Sync</button>
+
+        <div id="status-log">/root/waiting_for_input...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhWHf3sK1eLEwFg7p8KARQcXLkRO2R7ZQ",
+            authDomain: "my-persweb.firebaseapp.com",
+            projectId: "my-persweb",
+            storageBucket: "my-persweb.firebasestorage.app",
+            messagingSenderId: "327180060390",
+            appId: "1:327180060390:web:ad2c904ad4d4b0347a9d27"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const statusLog = document.getElementById('status-log');
+        const btnSave = document.getElementById('btnSave');
+
+        btnSave.addEventListener('click', async () => {
+            // Data Object සාදා ගැනීම
+            const data = {
+                name: document.getElementById('entryName').value,
+                whatsapp: document.getElementById('entryWA').value,
+                dob: document.getElementById('entryDOB').value,
+                address: document.getElementById('entryAddress').value,
+                school: document.getElementById('entrySchool').value,
+                status: document.getElementById('entryStatus').value,
+                access: document.getElementById('entryAccess').value,
+                timestamp: serverTimestamp()
+            };
+
+            // අත්‍යවශ්‍ය දත්ත තිබේදැයි පරීක්ෂා කිරීම
+            if(!data.name || !data.whatsapp || !data.address) {
+                statusLog.style.color = "red";
+                statusLog.innerText = "> CRITICAL_ERROR: MANDATORY FIELDS MISSING.";
+                return;
+            }
+
+            // Button එක Disable කිරීම (Double click වැළැක්වීමට)
+            btnSave.disabled = true;
+            btnSave.innerText = "SYNCHRONIZING...";
+            statusLog.style.color = "var(--primary)";
+            statusLog.innerText = "> ESTABLISHING CONNECTION TO DATABASE...";
+
+            try {
+                // 'all-data' collection එකට දත්ත ඇතුළත් කිරීම
+                await addDoc(collection(db, "all-data"), data);
+                
+                // සාර්ථක වූ පසු Notification එක
+                statusLog.classList.add('success-flash');
+                statusLog.innerHTML = "> SUCCESS: DATA INJECTED INTO CLOUD STORAGE.<br>> REDIRECTING TO MAIN_HUB IN 3 SECONDS...";
+                
+                // තත්පර 3කට පසු index.html වෙත යොමු කිරීම
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 3000);
+
+            } catch (e) {
+                btnSave.disabled = false;
+                btnSave.innerText = "Execute Data Sync";
+                statusLog.style.color = "red";
+                statusLog.innerText = "> UPLOAD_FAILED: " + e.message;
+                console.error("Error: ", e);
+            }
+        });
+    </script>
+</body>
+</html>

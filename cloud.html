@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLOUD STORAGE | I13.V</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --red: #ff0000;
+            --dark-red: #2a0000;
+            --bg: #000000;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle, #1a0000 0%, #000 100%);
+        }
+
+        .cloud-container {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(10, 0, 0, 0.9);
+            border: 1px solid var(--red);
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        h2 {
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--red);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        /* Upload Box */
+        .upload-area {
+            border: 2px dashed var(--red);
+            padding: 40px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            background: rgba(255, 0, 0, 0.05);
+            box-shadow: inset 0 0 20px rgba(255, 0, 0, 0.1);
+        }
+
+        .upload-area i {
+            font-size: 50px;
+            color: var(--red);
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #111;
+            border: 1px solid var(--red);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--red);
+            box-shadow: 0 0 10px var(--red);
+            transition: width 0.3s;
+        }
+
+        .status-msg {
+            font-size: 12px;
+            margin-top: 5px;
+            color: var(--red);
+            font-family: monospace;
+        }
+
+        .btn-upload {
+            background: var(--red);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-upload:hover {
+            background: #fff;
+            box-shadow: 0 0 20px #fff;
+        }
+
+        /* File List */
+        .file-list {
+            margin-top: 30px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background: #0a0a0a;
+            padding: 10px;
+            border-left: 3px solid var(--red);
+            margin-bottom: 5px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item a {
+            color: var(--red);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="cloud-container">
+    <h2><i class="fas fa-cloud-upload-alt"></i> CLOUD_UPLINK</h2>
+
+    <div class="upload-area" id="dropArea">
+        <i class="fas fa-file-import"></i>
+        <p id="fileNameDisplay">Drag & Drop or Click to Select File</p>
+        <input type="file" id="fileInput">
+    </div>
+
+    <div class="progress-wrapper" id="progressWrapper">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="status-msg" id="statusMsg">Uploading to Firebase Node...</div>
+    </div>
+
+    <button class="btn-upload" onclick="uploadFile()">Execute Upload</button>
+
+    <div class="file-list" id="fileList">
+        </div>
+</div>
+
+<script type="module">
+    // Firebase Modular SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+    // ඔබගේ Firebase Config එක මෙතැනට එක් කරන්න
+    const firebaseConfig = {
+        apiKey: "AIzaSyAhWHf3sK1eLEwFg7p8KARQcXLkRO2R7ZQ",
+        authDomain: "my-persweb.firebaseapp.com",
+        projectId: "my-persweb",
+        storageBucket: "my-persweb.firebasestorage.app", // මෙතැන වැදගත්
+        messagingSenderId: "327180060390",
+        appId: "1:327180060390:web:ad2c904ad4d4b0347a9d27"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const progressWrapper = document.getElementById('progressWrapper');
+    const progressFill = document.getElementById('progressFill');
+    const statusMsg = document.getElementById('statusMsg');
+
+    // පයිල් එකක් තෝරාගත් විට නම පෙන්වීමට
+    fileInput.onchange = () => {
+        if(fileInput.files[0]) {
+            fileNameDisplay.innerText = `Selected: ${fileInput.files[0].name}`;
+        }
+    };
+
+    window.uploadFile = () => {
+        const file = fileInput.files[0];
+        if(!file) return alert("Select a file first!");
+
+        progressWrapper.style.display = 'block';
+        
+        // Storage එකේ 'uploads' Folder එකට පයිල් එක යොමු කිරීම
+        const storageRef = ref(storage, 'uploads/' + file.name);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on('state_changed', 
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                progressFill.style.width = progress + '%';
+                statusMsg.innerText = `Uplinking: ${Math.round(progress)}%`;
+            }, 
+            (error) => {
+                alert("Upload Failed: " + error.message);
+            }, 
+            () => {
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                    statusMsg.innerText = "UPLOAD COMPLETE. NODE SECURED.";
+                    addToFileList(file.name, downloadURL);
+                });
+            }
+        );
+    };
+
+    function addToFileList(name, url) {
+        const list = document.getElementById('fileList');
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML = `
+            <span>${name}</span>
+            <a href="${url}" target="_blank"><i class="fas fa-external-link-alt"></i> VIEW</a>
+        `;
+        list.prepend(item);
+    }
+</script>
+
+</body>
+</html>

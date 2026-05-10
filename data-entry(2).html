@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURE DATA NODE | I13.V</title>
+    <style>
+        :root {
+            --red: #ff0000;
+            --bg: #000;
+            --glass: rgba(15, 0, 0, 0.9);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--red);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://www.gifcen.com/wp-content/uploads/2023/07/hacker-gif-5.gif');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            border: 1px solid var(--red);
+            background: var(--glass);
+            padding: 30px;
+            box-shadow: 0 0 20px var(--red);
+        }
+
+        h2 { border-bottom: 2px solid var(--red); padding-bottom: 10px; letter-spacing: 3px; }
+
+        .search-box {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px dashed var(--red);
+            background: rgba(30, 0, 0, 0.3);
+        }
+
+        input {
+            background: #111;
+            border: 1px solid var(--red);
+            color: #fff;
+            padding: 12px;
+            width: 100%;
+            margin: 10px 0;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .btn {
+            background: var(--red);
+            color: #000;
+            border: none;
+            padding: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .data-card {
+            border: 1px solid #400;
+            padding: 20px;
+            margin-top: 20px;
+            background: rgba(40, 0, 0, 0.6);
+            border-left: 5px solid var(--red);
+        }
+
+        .grid-info { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; font-size: 14px; }
+        .label { color: #888; text-transform: uppercase; }
+        .val { color: #fff; font-weight: bold; }
+
+        #lockOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+<div id="lockOverlay">
+    <h1 style="letter-spacing: 10px;">[ LOCKED ]</h1>
+    <p>PASSWORD REQUIRED FOR ENCRYPTED DATA</p>
+    <input type="password" id="passInput" style="width: 300px; text-align: center;" placeholder="ENTER KEY">
+    <button onclick="verifyAndUnlock()" class="btn" style="width: 200px; margin-top: 10px;">DECRYPT</button>
+    <p id="lockMsg"></p>
+</div>
+
+<div class="container">
+    <h2>> DATA_SEARCH_TERMINAL / I13.V</h2>
+    
+    <div class="search-box">
+        <label>Enter WhatsApp Number or Name to retrieve data:</label>
+        <input type="text" id="searchQuery" placeholder="Ex: 0712345678 or Indunil...">
+        <button onclick="searchData()" class="btn">SEARCH DATABASE</button>
+    </div>
+
+    <div id="statusOutput" style="font-size: 11px; color: #555;"></div>
+
+    <div id="dataDisplay">
+        <p style="opacity: 0.3; text-align: center;">Waiting for Search Query...</p>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAhWHf3sK1eLEwFg7p8KARQcXLkRO2R7ZQ",
+        authDomain: "my-persweb.firebaseapp.com",
+        projectId: "my-persweb",
+        storageBucket: "my-persweb.firebasestorage.app",
+        messagingSenderId: "327180060390",
+        appId: "1:327180060390:web:ad2c904ad4d4b0347a9d27"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let isAuthorized = false;
+    let tempResultData = null;
+
+    window.searchData = async () => {
+        const input = document.getElementById('searchQuery').value.trim();
+        const display = document.getElementById('dataDisplay');
+        const status = document.getElementById('statusOutput');
+
+        if (!input) {
+            alert("Please enter a search term.");
+            return;
+        }
+
+        status.innerText = "> Searching...";
+        display.innerHTML = "";
+
+        try {
+            const q = collection(db, "all-data");
+            const querySnapshot = await getDocs(q);
+            let found = false;
+
+            querySnapshot.forEach((record) => {
+                const item = record.data();
+                
+                // Name එක හෝ WhatsApp එක සමාන දැයි බලයි
+                if (item.name === input || item.whatsapp === input) {
+                    found = true;
+                    const card = document.createElement('div');
+                    card.className = "data-card";
+
+                    if (item.access === "no" && !isAuthorized) {
+                        card.innerHTML = `
+                            <p style="color:red; font-weight:bold;">[ FILE ENCRYPTED ]</p>
+                            <button onclick="window.openLock()" class="btn" style="width:150px;">UNLOCK</button>
+                        `;
+                    } else {
+                        card.innerHTML = `
+                            <div class="grid-info">
+                                <div class="label">Name:</div><div class="val">${item.name}</div>
+                                <div class="label">Address:</div><div class="val">${item.address}</div>
+                                <div class="label">WhatsApp:</div><div class="val" style="color:#00ff41;">${item.whatsapp}</div>
+                                <div class="label">Status:</div><div class="val" style="color:yellow;">${item.status}</div>
+                            </div>
+                        `;
+                    }
+                    display.appendChild(card);
+                }
+            });
+
+            if (!found) {
+                display.innerHTML = "<p style='color:orange;'>No records found for this identity.</p>";
+            }
+            status.innerText = "> Search complete.";
+
+        } catch (err) {
+            status.innerText = "> Error connecting to server.";
+            console.error(err);
+        }
+    };
+
+    window.openLock = () => {
+        document.getElementById('lockOverlay').style.display = 'flex';
+    };
+
+    window.verifyAndUnlock = async () => {
+        const pass = document.getElementById('passInput').value;
+        const accessRef = doc(db, "Access", "system-keys");
+        const snap = await getDoc(accessRef);
+
+        if (snap.exists() && pass === snap.data().password) {
+            isAuthorized = true;
+            document.getElementById('lockOverlay').style.display = 'none';
+            window.searchData(); // Unlock වූ පසු නැවත සොයයි
+        } else {
+            alert("Wrong Password!");
+        }
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TERMINAL PORTAL | INDUNIL13_RX</title>
+    <style>
+        :root {
+            --primary: #00ff41;
+            --primary-glow: rgba(0, 255, 65, 0.4);
+            --bg-dark: #000000;
+            --sidebar-bg: rgba(0, 15, 0, 0.8);
+            --accent: #ff0000; /* Alert / Red accent */
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--primary);
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Matrix Background */
+        #matrix-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        /* Main Portal Frame */
+        .portal-frame {
+            width: 90%;
+            max-width: 1100px;
+            height: 600px;
+            background: rgba(0, 5, 0, 0.85);
+            border: 1px solid var(--primary);
+            display: flex;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 255, 65, 0.1), inset 0 0 20px rgba(0, 255, 65, 0.05);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Sidebar Section */
+        .sidebar {
+            width: 320px;
+            border-right: 1px solid var(--primary);
+            background: var(--sidebar-bg);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .op-identity {
+            text-align: center;
+            border-bottom: 1px solid var(--primary-glow);
+            padding-bottom: 25px;
+        }
+
+        .avatar-glow {
+            width: 100px;
+            height: 100px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 0 25px var(--primary-glow);
+            background: rgba(0, 255, 65, 0.05);
+            position: relative;
+        }
+
+        .avatar-glow::after {
+            content: "";
+            position: absolute;
+            width: 110%;
+            height: 110%;
+            border: 1px solid var(--primary);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-badge {
+            font-size: 10px;
+            background: var(--primary);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Live Metrics */
+        .metrics-panel {
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 4px;
+        }
+
+        .metric-row span:last-child {
+            color: var(--primary);
+            text-shadow: 0 0 5px var(--primary);
+        }
+
+        /* Content Section */
+        .content-area {
+            flex: 1;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .sys-header {
+            font-size: 10px;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .brand h1 {
+            font-size: 4.5rem;
+            margin: 0;
+            letter-spacing: 12px;
+            font-weight: 900;
+            background: linear-gradient(to bottom, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px var(--primary-glow));
+        }
+
+        .brand p {
+            font-size: 14px;
+            color: #ccc;
+            letter-spacing: 4px;
+            margin-top: -5px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        /* Action Buttons */
+        .nav-hub {
+            margin-top: 60px;
+            display: flex;
+            gap: 30px;
+        }
+
+        .btn-cyber {
+            width: 220px;
+            height: 55px;
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.4s;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+        }
+
+        .btn-cyber::before {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-cyber:hover::before { left: 100%; }
+
+        .btn-cyber:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 30px var(--primary);
+            transform: translateY(-3px);
+        }
+
+        /* Decorations */
+        .frame-corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--primary);
+        }
+        .tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+        .tr { top: -2px; right: -2px; border-left: 0; border-bottom: 0; }
+        .bl { bottom: -2px; left: -2px; border-right: 0; border-top: 0; }
+        .br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+        footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            opacity: 0.5;
+            border-top: 1px solid rgba(0, 255, 65, 0.1);
+            padding-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix-canvas"></canvas>
+
+    <div class="portal-frame">
+        <div class="frame-corner tl"></div>
+        <div class="frame-corner tr"></div>
+        <div class="frame-corner bl"></div>
+        <div class="frame-corner br"></div>
+
+        <aside class="sidebar">
+            <div class="op-identity">
+                <div class="avatar-glow">RX</div>
+                <h3 style="margin: 10px 0 5px; letter-spacing: 2px;">INDUNIL13_RX</h3>
+                <span class="status-badge">AUTHORIZED OPERATOR</span>
+            </div>
+
+            <div class="metrics-panel">
+                <div class="metric-row"><span>DATE</span><span id="date">--/--/----</span></div>
+                <div class="metric-row"><span>TIME</span><span id="clock">00:00:00</span></div>
+                <div class="metric-row"><span>UPLINK</span><span>STABLE</span></div>
+                <div class="metric-row"><span>LATENCY</span><span>14ms</span></div>
+                <div class="metric-row"><span>SECURITY</span><span>LEVEL 10</span></div>
+            </div>
+
+            <div style="font-size: 9px; opacity: 0.4; line-height: 1.6;">
+                > KERNEL: V2.0.4-LTS<br>
+                > LOCATION: RIKILLAGASKADA, SL<br>
+                > ENCRYPTION: ACTIVE
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <div class="sys-header">
+                [ LOADING SYSTEM MODULES... DONE ]<br>
+                [ SECURITY PROTOCOLS... ACTIVE ]<br>
+                [ WELCOME TO PERSWEB CENTRAL INTERFACE ]
+            </div>
+
+            <div class="brand">
+                <h1>PERSWEB</h1>
+                <p>Indunil Professional Portal</p>
+            </div>
+
+            <div class="nav-hub">
+                <button class="btn-cyber" onclick="location.href='login.html'">System Login</button>
+                <button class="btn-cyber" onclick="location.href='register.html'">New Registration</button>
+            </div>
+
+            <footer>
+                <span>&copy; 2026 PERSWEB_RX.INTERNAL</span>
+                <span>AUTHENTICATED ACCESS ONLY</span>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // Matrix Rain Animation
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$*";
+        const fontSize = 12;
+        const columns = canvas.width / fontSize;
+        const drops = Array.from({ length: columns }).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#00ff41";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 50);
+
+        // Real-time Clock and Date
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
+            const dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '.');
+            
+            document.getElementById('clock').innerText = timeStr;
+            document.getElementById('date').innerText = dateStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Responsive handling
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

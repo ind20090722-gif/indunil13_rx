@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONNECT | INDUNIL RATHNAYAKE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --red: #ff0000;
+            --dark-red: #8b0000;
+            --bg: #000000;
+            --glass: rgba(20, 0, 0, 0.8);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at center, #1a0000 0%, #000 100%);
+            overflow-x: hidden;
+        }
+
+        /* Matrix Rain Background (Subtle) */
+        #matrix {
+            position: fixed;
+            top: 0; left: 0; z-index: -1;
+            opacity: 0.1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 40px 20px;
+            text-align: center;
+            animation: slideUp 1s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Profile Section */
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--red);
+            padding: 5px;
+            box-shadow: 0 0 20px var(--red);
+            margin-bottom: 15px;
+            object-fit: cover;
+        }
+
+        h1 {
+            font-size: 24px;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--red);
+        }
+
+        p.username {
+            color: var(--red);
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        /* Grid Layout for Links */
+        .links-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .link-card {
+            background: var(--glass);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #fff;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .link-card i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: var(--red);
+        }
+
+        .link-card span {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .link-card:hover {
+            background: var(--red);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--red);
+            border-color: #fff;
+        }
+
+        .link-card:hover i, .link-card:hover span {
+            color: #000;
+        }
+
+        /* Full Width Link (Special) */
+        .full-link {
+            grid-column: span 2;
+            flex-direction: row;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            font-size: 10px;
+            opacity: 0.5;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="container">
+        
+    <h1>R M N Indunil Rathnayake</h1>
+    <p class="username">@indunil13_rx</p>
+
+    <div class="links-grid">
+        <a href="https://facebook.com/indunilrathnayake13" class="link-card" target="_blank">
+            <i class="fab fa-facebook-f"></i>
+            <span>Facebook</span>
+        </a>
+
+        <a href="https://www.instagram.com/indunil13_rx" class="link-card" target="_blank">
+            <i class="fab fa-instagram"></i>
+            <span>Instagram</span>
+        </a>
+
+        <a href="https://www.tiktok.com/@indunil_13rx" class="link-card" target="_blank">
+            <i class="fab fa-tiktok"></i>
+            <span>TikTok</span>
+        </a>
+
+        <a href="mailto:n.indunilrathnayake@gmail.com" class="link-card" target="_blank">
+            <i class="fab fa-youtube"></i>
+            <span>YouTube</span>
+        </a>
+
+        <a href="https://wa.me/94761113946" class="link-card" target="_blank">
+            <i class="fab fa-whatsapp"></i>
+            <span>WhatsApp</span>
+        </a>
+
+        <a href="https://t.me/Indunil13_rx" class="link-card" target="_blank">
+            <i class="fab fa-telegram-plane"></i>
+            <span>Telegram</span>
+        </a>
+
+        <a href="https://github.com/ind20090722-gif" class="link-card" target="_blank">
+            <i class="fab fa-github"></i>
+            <span>GitHub</span>
+        </a>
+
+        <a href="#" class="link-card">
+            <i class="fab fa-spotify"></i>
+            <span>Spotify</span>
+        </a>
+
+        <a href="#" class="link-card">
+            <i class="fa-solid fa-at"></i>
+            <span>Threads</span>
+        </a>
+
+        <a href="#" class="link-card">
+            <i class="fab fa-google-drive"></i>
+            <span>Drive</span>
+        </a>
+
+        <a href="mailto:n.indunilrathnayake@gmail.com" class="link-card full-link">
+            <i class="fas fa-envelope"></i>
+            <span>n.indunilrathnayake@gmail.com</span>
+        </a>
+    </div>
+
+    <div class="footer">
+        POWERED BY PERSWEB SYSTEM v2.0 // 2026
+    </div>
+</div>
+
+<script>
+    // Matrix Background Animation
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const chars = "01010101ABCDEF";
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function draw() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ff0000";
+        ctx.font = fontSize + "px monospace";
+
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    setInterval(draw, 50);
+
+    window.onresize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+</script>
+
+</body>
+</html>

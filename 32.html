@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TERMINAL PORTAL I13.V | INDUNIL13_RX</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --red: #ff0000;
+            --low-red: rgba(255, 0, 0, 0.15);
+            --bg: #000000;
+            --font: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--red);
+            font-family: var(--font);
+            margin: 0;
+            padding: 15px;
+            overflow-x: hidden;
+            /* පසුබිමට GIF එක සහ Gradient එක එක් කිරීම */
+            background: 
+                linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)),
+                url('https://www.gifcen.com/wp-content/uploads/2023/07/hacker-gif-5.gif');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr 1fr;
+            gap: 15px;
+            max-width: 1600px;
+            margin: auto;
+        }
+
+        .panel {
+            border: 1px solid var(--red);
+            background: rgba(5, 0, 0, 0.9);
+            padding: 15px;
+            position: relative;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .panel-header {
+            font-size: 13px;
+            font-weight: bold;
+            border-bottom: 1px solid var(--red);
+            margin-bottom: 12px;
+            padding-bottom: 5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        header {
+            grid-column: span 3;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid var(--red);
+            padding: 15px 30px;
+            background: rgba(20, 0, 0, 0.8);
+            margin-bottom: 10px;
+            box-shadow: 0 0 20px var(--low-red);
+        }
+
+        .profile-pic {
+            width: 70px; height: 70px;
+            border: 2px solid var(--red);
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 0 15px var(--red);
+        }
+
+        .big-clock { font-size: 38px; font-weight: bold; text-shadow: 0 0 15px var(--red); }
+
+        #map {
+            height: 380px;
+            filter: invert(100%) hue-rotate(180deg) brightness(0.8) contrast(1.2);
+            border: 1px solid var(--red);
+        }
+
+        /* Data Entry Button */
+        .btn-center {
+            grid-column: span 3;
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .data-entry-btn {
+            background: rgba(255, 0, 0, 0.1);
+            color: var(--red);
+            border: 2px solid var(--red);
+            padding: 18px 80px;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.4s;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+        }
+
+        .data-entry-btn:hover {
+            background: var(--red);
+            color: #000;
+            box-shadow: 0 0 40px var(--red);
+            transform: scale(1.05);
+        }
+
+        /* Progress Bars */
+        .bar-bg { height: 8px; background: #111; border: 1px solid var(--red); margin: 5px 0 12px 0; }
+        .bar-fill { height: 100%; background: var(--red); box-shadow: 0 0 10px var(--red); }
+
+        .log-box {
+            font-size: 11px;
+            color: #00ff41; /* Classic Matrix Green */
+            height: 120px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border: 1px solid #004400;
+        }
+
+        .sub-btn {
+            display: inline-block;
+            width: 45%;
+            padding: 10px;
+            margin: 5px 2%;
+            border: 1px solid var(--red);
+            color: var(--red);
+            text-decoration: none;
+            text-align: center;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+
+        .sub-btn:hover { background: var(--red); color: #000; }
+
+    </style>
+</head>
+<body>
+
+<div class="dashboard-grid">
+    
+    <header>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <img src="https://drive.google.com/thumbnail?id=12XoTpmX1--Dg8eDbvF0Y353ujoHv7QWw&sz=w200" class="profile-pic">
+            <div>
+                <h1 style="margin:0; font-size: 24px;">PERSONAL WEB PORTAL I13.V</h1>
+                <p style="margin:5px 0 0; font-size: 13px; color: #fff;">ID: <span style="color: var(--red);">indunil13_rx</span> | SECURITY: <span style="color: #00ff00;">LEVEL 10</span></p>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <div id="liveClock" class="big-clock">00:00:00</div>
+            <div id="liveDate" style="letter-spacing: 2px;">2026.05.09</div>
+        </div>
+    </header>
+
+    <div class="panel" style="grid-row: span 2;">
+        <div class="panel-header">LIVE_LOCATION_SAT_VIEW</div>
+        <div id="map"></div>
+        <div id="geoData" style="font-size: 11px; margin-top: 12px; color: #aaa; background: #000; padding: 5px;">
+            > ANALYZING GPS DATA...
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">CORE_SYSTEM_METRICS</div>
+        CPU UTILIZATION <div class="bar-bg"><div class="bar-fill" style="width: 82%;"></div></div>
+        MEMORY ENCRYPTION <div class="bar-bg"><div class="bar-fill" style="width: 65%;"></div></div>
+        UPLINK SPEED <div class="bar-bg"><div class="bar-fill" style="width: 94%;"></div></div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">ACTIVE_OPERATIONS</div>
+        <div style="font-size: 12px; line-height: 1.8;">
+            > PROJECT I13: <span style="color: #00ff00;">ACTIVE</span><br>
+            > DATA NODE: <span style="color: #00ff00;">STABLE</span><br>
+            > PROXY LAYER: <span style="color: #00ff00;">SECURED</span>
+        </div>
+        <div style="margin-top: 15px;">
+            <a href="cloud.html" class="sub-btn">CLOUD_ACCESS</a>
+            <a href="SM.html" class="sub-btn">SM_PORTAL</a>
+        </div>
+    </div>
+
+    <div class="btn-center">
+        <a href="data-entry.html" class="data-entry-btn">EXECUTE DATA ENTRY</a>
+    </div>
+
+    <div class="panel" style="grid-column: span 2;">
+        <div class="panel-header">SYSTEM_TERMINAL_LOGS</div>
+        <div class="log-box" id="logStream">
+            > SYSTEM_BOOT_SEQUENCE_COMPLETE...<br>
+            > ESTABLISHING SECURE CONNECTION TO RIKILLAGASKADA...<br>
+            > ENCRYPTION KEY 113.V LOADED...
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">NETWORK_VISUALIZER</div>
+        <div style="height: 100px; overflow: hidden; opacity: 0.7;">
+            <img src="https://www.gifcen.com/wp-content/uploads/2023/07/hacker-gif-5.gif" style="width: 100%; filter: grayscale(1) contrast(2);">
+        </div>
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // 1. Clock
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('liveClock').innerText = now.toLocaleTimeString('en-GB');
+        document.getElementById('liveDate').innerText = "DATE: " + now.toISOString().split('T')[0].replace(/-/g, '.');
+    }, 1000);
+
+    // 2. Real Location Map
+    const map = L.map('map').setView([7.1486, 80.7907], 13);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            const { latitude, longitude } = pos.coords;
+            map.setView([latitude, longitude], 15);
+            L.circleMarker([latitude, longitude], { color: 'red', radius: 10, fillOpacity: 0.8 }).addTo(map)
+                .bindPopup("<b>INDUNIL_RX</b><br>NODE_ACTIVE").openPopup();
+            document.getElementById('geoData').innerText = `> TARGET_LOCATED: LAT ${latitude.toFixed(4)} | LON ${longitude.toFixed(4)} | ALT: 452m`;
+        });
+    }
+
+    // 3. Auto Logs
+    const logBox = document.getElementById('logStream');
+    const logs = ["> Scanning vulnerabilities...", "> Bypass handshake...", "> Node 113.V responding...", "> Routing via encrypted tunnel...", "> Database sync: 100%"];
+    setInterval(() => {
+        const line = document.createElement('div');
+        line.innerText = logs[Math.floor(Math.random() * logs.length)];
+        logBox.appendChild(line);
+        if (logBox.childNodes.length > 8) logBox.removeChild(logBox.childNodes[0]);
+    }, 2500);
+</script>
+
+</body>
+</html>

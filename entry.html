@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PersWEB.indunil13_rx | OFFICIAL ENTRY</title>
+    <style>
+        :root {
+            --red: #ff0000;
+            --dark-red: #8b0000;
+            --black: #050505;
+            --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--black);
+            font-family: var(--font);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* පසුබිම් GIF සහ වීඩියෝ එකතුව */
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.85)), 
+                        url('https://www.gifcen.com/wp-content/uploads/2023/07/hacker-gif-5.gif');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            filter: contrast(1.2) brightness(0.6);
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 40px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            background: rgba(10, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.15);
+            animation: fadeIn 2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .logo-text {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px var(--red);
+        }
+
+        .logo-text span {
+            color: var(--red);
+        }
+
+        .sub-text {
+            color: #aaa;
+            font-size: 14px;
+            letter-spacing: 4px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn {
+            position: relative;
+            width: 280px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            letter-spacing: 3px;
+            transition: 0.5s;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+        /* Login Button Style */
+        .btn-login {
+            background: var(--red);
+            color: #000;
+            border: none;
+            box-shadow: 0 0 15px var(--red);
+        }
+
+        .btn-login:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 30px #fff;
+            transform: translateY(-3px);
+        }
+
+        /* Register Button Style */
+        .btn-register {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid var(--red);
+        }
+
+        .btn-register:hover {
+            background: var(--low-red);
+            color: #fff;
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        /* Floating elements effect */
+        .decoration-line {
+            width: 100px;
+            height: 2px;
+            background: var(--red);
+            margin: 20px auto;
+            box-shadow: 0 0 10px var(--red);
+        }
+
+        /* Scanner line effect */
+        .scanner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--red);
+            opacity: 0.5;
+            box-shadow: 0 0 10px var(--red);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="background-overlay"></div>
+
+<div class="container">
+    <div class="scanner"></div>
+    <div class="logo-text">Pers<span>WEB</span></div>
+    <div class="sub-text">indunil13_rx | Professional Node</div>
+    
+    <div class="decoration-line"></div>
+
+    <div class="btn-group">
+        <a href="login.html" class="btn btn-login">System Login</a>
+        <a href="register.html" class="btn btn-register">New Registration</a>
+    </div>
+
+    <p style="color: #444; font-size: 10px; margin-top: 50px; letter-spacing: 2px;">
+        AUTHORIZED ACCESS ONLY • ENCRYPTED CONNECTION
+    </p>
+</div>
+
+<script>
+    // අමතර ආකර්ෂණයක් සඳහා Mouse move effect එකක්
+    document.addEventListener('mousemove', (e) => {
+        const container = document.querySelector('.container');
+        const x = (window.innerWidth / 2 - e.pageX) / 30;
+        const y = (window.innerHeight / 2 - e.pageY) / 30;
+        container.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+    });
+</script>
+
+</body>
+</html>

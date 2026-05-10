@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURE DATA NODE | I13.V SYSTEM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --red: #ff0000;
+            --dark-red: #330000;
+            --glow: rgba(255, 0, 0, 0.6);
+            --bg: #000000;
+            --glass: rgba(10, 0, 0, 0.9);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)),
+                url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+        }
+
+        /* Animated Background Matrix Effect (Subtle) */
+        .bg-effect {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            background: url('https://www.gifcen.com/wp-content/uploads/2023/07/hacker-gif-5.gif') center/cover;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--glass);
+            border: 1px solid var(--red);
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header HUD */
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--red);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .terminal-header h2 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--red);
+            text-shadow: 0 0 10px var(--glow);
+        }
+
+        /* Search Section */
+        .search-area {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .search-area input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--dark-red);
+            padding: 18px 20px 18px 50px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+            border-radius: 4px;
+        }
+
+        .search-area i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--red);
+        }
+
+        .search-area input:focus {
+            border-color: var(--red);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-search {
+            width: 100%;
+            background: var(--red);
+            color: #000;
+            border: none;
+            padding: 15px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: 0.3s;
+            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+        }
+
+        .btn-search:hover {
+            background: #fff;
+            box-shadow: 0 0 20px #fff;
+            transform: scale(1.02);
+        }
+
+        /* Result Cards */
+        .data-card {
+            background: rgba(20, 0, 0, 0.6);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            margin-top: 25px;
+            padding: 25px;
+            border-left: 4px solid var(--red);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .data-card::before {
+            content: "SECURE_DATA";
+            position: absolute;
+            top: -5px; right: 10px;
+            font-size: 10px;
+            color: var(--red);
+            opacity: 0.5;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-row .label { color: #888; font-size: 12px; text-transform: uppercase; }
+        .info-row .value { color: #fff; font-weight: 600; }
+
+        /* Lock Overlay */
+        #lockOverlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(15px);
+        }
+
+        .lock-box {
+            text-align: center;
+            border: 1px solid var(--red);
+            padding: 50px;
+            background: var(--glass);
+        }
+
+        /* Decorative Corners */
+        .corner { position: absolute; width: 20px; height: 20px; border: 2px solid var(--red); }
+        .tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+        .br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+    </style>
+</head>
+<body>
+
+<div class="bg-effect"></div>
+
+<div id="lockOverlay">
+    <div class="lock-box">
+        <i class="fas fa-user-shield" style="font-size: 50px; color: var(--red); margin-bottom: 20px;"></i>
+        <h1 style="letter-spacing: 5px; color: #fff;">ENCRYPTED NODE</h1>
+        <p style="color: #666; font-size: 12px; margin-bottom: 20px;">AUTHORIZATION KEY REQUIRED</p>
+        <input type="password" id="passInput" style="background: #111; border: 1px solid var(--red); color: #fff; padding: 12px; width: 100%; text-align: center; margin-bottom: 20px;" placeholder="••••••••">
+        <button onclick="verifyAndUnlock()" class="btn-search">Decrypt File</button>
+        <p id="lockMsg" style="color: red; margin-top: 15px; font-size: 12px;"></p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="corner tl"></div>
+    <div class="corner br"></div>
+
+    <div class="terminal-header">
+        <h2><i class="fas fa-database"></i> Central Data Terminal</h2>
+        <div style="font-size: 10px; color: #555;">SYSTEM: I13.V v2.4</div>
+    </div>
+
+    <div class="search-area">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchQuery" placeholder="Search by Name or WhatsApp Number...">
+    </div>
+    
+    <button onclick="searchData()" class="btn-search">Search Database</button>
+
+    <div id="statusOutput" style="margin-top: 15px; font-size: 11px; font-family: monospace; color: #444;"></div>
+
+    <div id="dataDisplay">
+        <div style="text-align: center; padding: 40px; opacity: 0.2;">
+            <i class="fas fa-terminal" style="font-size: 40px; margin-bottom: 15px;"></i>
+            <p>TERMINAL IDLE. AWAITING INPUT...</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAhWHf3sK1eLEwFg7p8KARQcXLkRO2R7ZQ",
+        authDomain: "my-persweb.firebaseapp.com",
+        projectId: "my-persweb",
+        storageBucket: "my-persweb.firebasestorage.app",
+        messagingSenderId: "327180060390",
+        appId: "1:327180060390:web:ad2c904ad4d4b0347a9d27"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let isAuthorized = false;
+
+    window.searchData = async () => {
+        const input = document.getElementById('searchQuery').value.trim();
+        const display = document.getElementById('dataDisplay');
+        const status = document.getElementById('statusOutput');
+
+        if (!input) return;
+
+        status.innerHTML = `<span style="color:var(--red);">>></span> INITIATING DATABASE SCAN...`;
+        display.innerHTML = `<div style="text-align:center; padding:20px;"><i class="fas fa-circle-notch fa-spin"></i> ANALYZING NODES...</div>`;
+
+        try {
+            const q = collection(db, "all-data");
+            const querySnapshot = await getDocs(q);
+            let found = false;
+            display.innerHTML = "";
+
+            querySnapshot.forEach((record) => {
+                const item = record.data();
+                
+                if (item.name === input || item.whatsapp === input) {
+                    found = true;
+                    const card = document.createElement('div');
+                    card.className = "data-card";
+
+                    if (item.access === "no" && !isAuthorized) {
+                        card.innerHTML = `
+                            <div style="text-align:center; padding:10px;">
+                                <i class="fas fa-lock" style="font-size:30px; color:var(--red); margin-bottom:10px;"></i>
+                                <p style="color:var(--red); font-weight:bold; letter-spacing:2px;">FILE ENCRYPTED</p>
+                                <button onclick="window.openLock()" class="btn-search" style="width:180px; font-size:12px; padding:10px;">Request Access</button>
+                            </div>
+                        `;
+                    } else {
+                        card.innerHTML = `
+                            <div class="info-row"><span class="label">Identity</span><span class="value">${item.name}</span></div>
+                            <div class="info-row"><span class="label">Location</span><span class="value">${item.address}</span></div>
+                            <div class="info-row"><span class="label">Uplink</span><span class="value" style="color:#00ff41;">${item.whatsapp}</span></div>
+                            <div class="info-row"><span class="label">Priority</span><span class="value" style="color:yellow;">${item.status}</span></div>
+                        `;
+                    }
+                    display.appendChild(card);
+                }
+            });
+
+            if (!found) {
+                display.innerHTML = `<p style='color:orange; text-align:center; padding:20px;'>NO MATCHING IDENTITY FOUND IN CORE DATABASE.</p>`;
+            }
+            status.innerHTML = `<span style="color:lime;">>></span> SCAN COMPLETE.`;
+
+        } catch (err) {
+            status.innerHTML = `<span style="color:red;">>></span> CONNECTION_ERROR: DATA_FETCH_FAILED`;
+        }
+    };
+
+    window.openLock = () => {
+        document.getElementById('lockOverlay').style.display = 'flex';
+    };
+
+    window.verifyAndUnlock = async () => {
+        const pass = document.getElementById('passInput').value;
+        const msg = document.getElementById('lockMsg');
+        
+        try {
+            const accessRef = doc(db, "Access", "system-keys");
+            const snap = await getDoc(accessRef);
+
+            if (snap.exists() && pass === snap.data().password) {
+                isAuthorized = true;
+                document.getElementById('lockOverlay').style.display = 'none';
+                window.searchData();
+            } else {
+                msg.innerText = "ACCESS DENIED: INVALID SECURITY KEY";
+            }
+        } catch (e) {
+            msg.innerText = "ERROR: ACCESS_SERVER_OFFLINE";
+        }
+    };
+</script>
+</body>
+</html>
