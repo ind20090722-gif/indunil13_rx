@@ -3,317 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PERSWEB CENTRAL | I13.V SYSTEM</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>TERMINAL PORTAL | INDUNIL13_RX</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --red: #ff0000;
-            --dark-red: #4a0000;
-            --accent: #ff4d4d;
-            --bg: #000000;
+            --primary: #ff0000;
+            --primary-glow: rgba(255, 0, 0, 0.6);
+            --bg-dark: #000000;
             --glass: rgba(15, 0, 0, 0.85);
-            --border-glow: 0 0 15px rgba(255, 0, 0, 0.4);
+            --font-mono: 'Courier New', monospace;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--bg);
+            background-color: var(--bg-dark);
             color: #fff;
-            font-family: 'Segoe UI', 'Courier New', monospace;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 50% 50%, #1a0000 0%, #000 100%),
-                url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-            background-attachment: fixed;
+            padding: 15px;
         }
 
-        /* Top HUD Bar */
-        .hud-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Matrix Background */
+        #matrix-canvas {
+            position: fixed;
+            top: 0; left: 0; z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* Main Container */
+        .portal-frame {
+            width: 100%;
+            max-width: 1100px;
+            min-height: 600px;
             background: var(--glass);
-            border: 1px solid var(--red);
-            padding: 15px 40px;
-            margin-bottom: 25px;
-            clip-path: polygon(2% 0, 98% 0, 100% 100%, 0 100%);
-            box-shadow: var(--border-glow);
+            border: 1px solid var(--primary);
+            display: flex;
+            flex-direction: row;
+            position: relative;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.2);
+            animation: emerge 1s ease-out;
         }
 
-        .user-profile {
+        @keyframes emerge {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Sidebar Section */
+        .sidebar {
+            width: 300px;
+            border-right: 1px solid var(--primary);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* RX Animated Spinner */
+        .avatar-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 15px;
             display: flex;
             align-items: center;
-            gap: 20px;
+            justify-content: center;
         }
 
-        .avatar-container {
+        .avatar-box {
+            width: 80px;
+            height: 80px;
+            border: 1px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 22px;
+            background: rgba(255, 0, 0, 0.1);
+            z-index: 2;
             position: relative;
-            width: 75px;
-            height: 75px;
         }
 
-        .avatar-container img {
+        .spinner {
+            position: absolute;
             width: 100%;
             height: 100%;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--primary);
+            border-bottom: 2px solid var(--primary);
             border-radius: 50%;
-            border: 2px solid var(--red);
-            padding: 3px;
-            object-fit: cover;
+            animation: rotate-spinner 2.5s linear infinite;
+            box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        .scan-line {
+        .spinner::before {
+            content: '';
             position: absolute;
-            top: 0; width: 100%; height: 2px;
-            background: var(--red);
-            box-shadow: 0 0 10px var(--red);
-            animation: scanning 2s linear infinite;
+            top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 1px dashed var(--primary);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: rotate-spinner 5s linear reverse infinite;
         }
 
-        @keyframes scanning {
-            0% { top: 0; } 100% { top: 100%; }
+        @keyframes rotate-spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* Main Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 350px 1fr 350px;
-            gap: 20px;
-            max-width: 1700px;
-            margin: auto;
-        }
+        /* Decorative Corners */
+        .corner { position: absolute; width: 10px; height: 10px; border: 2px solid var(--primary); }
+        .c-tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+        .c-br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
 
-        .card {
-            background: var(--glass);
-            border: 1px solid var(--red);
-            padding: 20px;
-            position: relative;
-            backdrop-filter: blur(10px);
-            transition: 0.3s;
-        }
-
-        .card:hover { border-color: #fff; box-shadow: 0 0 20px rgba(255, 0, 0, 0.2); }
-
-        .card-title {
+        /* Metrics Display */
+        .metrics { margin-top: 10px; }
+        .metric-item {
+            font-family: var(--font-mono);
             font-size: 11px;
-            letter-spacing: 3px;
-            color: var(--red);
-            margin-bottom: 20px;
-            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            color: #888;
+            border-bottom: 1px solid rgba(255, 0, 0, 0.1);
+            padding-bottom: 4px;
+        }
+        .metric-item span:last-child { color: var(--primary); font-weight: bold; }
+
+        /* Main Content */
+        .content-area {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .brand-section h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            letter-spacing: 12px;
+            color: #fff;
+            text-shadow: 0 0 25px var(--primary-glow);
+            line-height: 1;
             font-weight: 900;
+        }
+
+        .brand-section p {
+            color: var(--primary);
+            letter-spacing: 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 45px;
+            font-size: 13px;
+        }
+
+        /* Action Hub Buttons */
+        .nav-hub {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .btn-cyber {
+            padding: 16px;
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
         }
 
-        .card-title i { font-size: 14px; }
-
-        /* Map Styling */
-        #map {
-            height: 400px;
-            border: 1px solid var(--red);
-            filter: invert(100%) hue-rotate(180deg) brightness(0.7) contrast(1.2);
-        }
-
-        /* Metric Bars */
-        .metric { margin-bottom: 15px; font-size: 12px; }
-        .bar-container {
-            height: 6px;
-            background: #111;
-            margin-top: 5px;
-            position: relative;
-            overflow: hidden;
-        }
-        .bar-fill {
-            height: 100%;
-            background: var(--red);
-            box-shadow: 0 0 10px var(--red);
-        }
-
-        /* Central Action Button */
-        .action-zone {
-            grid-column: span 3;
-            display: flex;
-            justify-content: center;
-            padding: 30px 0;
-        }
-
-        .btn-main {
-            background: transparent;
-            border: 2px solid var(--red);
-            color: #fff;
-            padding: 20px 60px;
-            font-size: 20px;
-            font-weight: bold;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 8px;
-            position: relative;
-            overflow: hidden;
-            transition: 0.3s;
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
-        }
-
-        .btn-main:hover {
-            background: var(--red);
+        .btn-cyber:hover {
+            background: var(--primary);
             color: #000;
-            box-shadow: 0 0 50px var(--red);
+            box-shadow: 0 0 35px var(--primary);
+            transform: translateY(-2px);
         }
 
-        /* Terminal Output */
-        .terminal {
-            background: rgba(0,0,0,0.8);
-            height: 150px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            padding: 10px;
-            color: #00ff41;
-            overflow-y: hidden;
-            border: 1px solid #222;
+        /* Footer Info */
+        footer {
+            margin-top: auto;
+            font-size: 10px;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255,0,0,0.1);
+            padding-top: 20px;
         }
 
-        .status-dot {
-            height: 8px; width: 8px;
-            background: #00ff00;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-            box-shadow: 0 0 5px #00ff00;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink { 50% { opacity: 0; } }
-
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .dashboard-grid { grid-template-columns: 1fr 1fr; }
-            .action-zone { grid-column: span 2; }
+        /* Responsive Breakpoints */
+        @media (max-width: 850px) {
+            .portal-frame {
+                flex-direction: column;
+                min-height: auto;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--primary);
+                padding: 25px;
+            }
+            .content-area {
+                padding: 40px 20px;
+                text-align: center;
+            }
+            .nav-hub {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
 
-    <header class="hud-header">
-        <div class="user-profile">
-            <div class="avatar-container">
-                <img src="https://www.clipartmax.com/png/middle/446-4461705_logo-of-hackers.png" alt="Operator">
-                <div class="scan-line"></div>
-            </div>
-            <div>
-                <h2 style="margin:0; letter-spacing: 2px;">R M N INDUNIL RATHNAYAKE</h2>
-                <p style="margin:5px 0 0; font-size: 12px; opacity: 0.7;">
-                    <span class="status-dot"></span> SYSTEM OPERATOR // AUTH_TOKEN: RX_113V
-                </p>
-            </div>
-        </div>
-        <div style="text-align: right;">
-            <div id="clock" style="font-size: 32px; font-weight: bold; color: var(--red);">00:00:00</div>
-            <div id="date" style="font-size: 12px; letter-spacing: 4px;">2026.05.10</div>
-        </div>
-    </header>
+    <canvas id="matrix-canvas"></canvas>
 
-    <div class="dashboard-grid">
-        
-        <div class="card">
-            <div class="card-title"><i class="fas fa-microchip"></i> System Resources</div>
-            <div class="metric">
-                NEURAL UPLINK <span style="float: right;">94%</span>
-                <div class="bar-container"><div class="bar-fill" style="width: 94%;"></div></div>
-            </div>
-            <div class="metric">
-                ENCRYPTION STRENGTH <span style="float: right;">82%</span>
-                <div class="bar-container"><div class="bar-fill" style="width: 82%;"></div></div>
-            </div>
-            <div class="metric">
-                PROXY STABILITY <span style="float: right;">68%</span>
-                <div class="bar-container"><div class="bar-fill" style="width: 68%;"></div></div>
-            </div>
-
-            <div style="margin-top: 30px;">
-                <div class="card-title"><i class="fas fa-network-wired"></i> Quick Access</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <a href="sm.html" style="color:#fff; text-decoration:none; border:1px solid #333; padding:10px; font-size:10px; text-align:center;">SOCIAL HUB</a>
-                    <a href="cloud.html" style="color:#fff; text-decoration:none; border:1px solid #333; padding:10px; font-size:10px; text-align:center;">CLOUD STORAGE</a>
+    <div class="portal-frame">
+        <aside class="sidebar">
+            <div class="op-identity">
+                <div class="avatar-wrapper">
+                    <div class="spinner"></div>
+                    <div class="avatar-box">
+                        <div class="corner c-tl"></div>
+                        <div class="corner c-br"></div>
+                        RX
+                    </div>
                 </div>
+                <h2 style="font-size: 18px; letter-spacing: 2px;">INDUNIL13_RX</h2>
+                <p style="font-size: 10px; color: var(--primary); margin-top: 8px;">[ RED COMMAND ACCESS ]</p>
             </div>
-        </div>
 
-        <div class="card" style="padding: 0;">
-            <div class="card-title" style="padding: 20px 20px 0 20px;"><i class="fas fa-satellite"></i> Geospatial Node Tracker</div>
-            <div id="map"></div>
-            <div style="padding: 15px; font-size: 11px; color: #888;">
-                <i class="fas fa-map-marker-alt" style="color: var(--red);"></i> CURRENT_NODE: <span id="coords">WAITING FOR GPS...</span>
+            <div class="metrics">
+                <div class="metric-item"><span>SYS_DATE</span><span id="date">--.--.----</span></div>
+                <div class="metric-item"><span>SYS_TIME</span><span id="clock">00:00:00</span></div>
+                <div class="metric-item"><span>LOCAL_NODE</span><span>RIKILLAGASKADA_01</span></div>
+                <div class="metric-item"><span>ENC_LEVEL</span><span>AES_256_ULTRA</span></div>
             </div>
-        </div>
 
-        <div class="card">
-            <div class="card-title"><i class="fas fa-terminal"></i> Live Data Stream</div>
-            <div class="terminal" id="termOutput">
-                >> Initializing kernel v3.0...<br>
-                >> Loading encrypted modules...<br>
-                >> Secure tunnel established...
+            <div style="font-size: 9px; color: #555; font-family: var(--font-mono); line-height: 1.6;">
+                > BOOT_SEQUENCE: COMPLETED<br>
+                > FIREWALL_STATUS: ACTIVE<br>
+                > WAITING_FOR_OPERATOR_INPUT...
             </div>
-            <div style="margin-top: 25px;">
-                <div class="card-title"><i class="fas fa-shield-alt"></i> Security Logs</div>
-                <div style="font-size: 11px; line-height: 2;">
-                    <span style="color:yellow;">[WARN]</span> Unauthorized ping detected<br>
-                    <span style="color:lime;">[INFO]</span> Firewall status: OPTIMAL<br>
-                    <span style="color:lime;">[INFO]</span> IP masking: ACTIVE
-                </div>
+        </aside>
+
+        <main class="content-area">
+            <div class="brand-section">
+                <p style="font-size: 11px;">Restricted Access Gateway</p>
+                <h1>PERSWEB</h1>
+                <p>Advanced Cyber Intelligence Node</p>
             </div>
-        </div>
 
-        <div class="action-zone">
-            <a href="data-entry.html" class="btn-main">Execute Data Entry</a>
-        </div>
+            <div class="nav-hub">
+                <button class="btn-cyber" onclick="location.href='login.html'">
+                    <i class="fas fa-sign-in-alt"></i> Secure Login
+                </button>
+                <button class="btn-cyber" onclick="location.href='register.html'">
+                    <i class="fas fa-user-plus"></i> New Database
+                </button>
+            </div>
 
+            <footer>
+                <span>PORTAL VERSION 113.V</span>
+                <span style="color: var(--primary);">© 2026 INDUNIL_RX</span>
+            </footer>
+        </main>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 1. Clock Update
+        // Matrix Rain Animation
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.onresize = resizeCanvas;
+        resizeCanvas();
+
+        const chars = "0101010101ABCDEF";
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#ff0000"; // Red text
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 50);
+
+        // Real-time Clock and Date
         function updateHUD() {
             const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB');
-            document.getElementById('date').innerText = now.toISOString().split('T')[0].replace(/-/g, '.');
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+            document.getElementById('date').innerText = now.toLocaleDateString('en-GB').replace(/\//g, '.');
         }
         setInterval(updateHUD, 1000);
         updateHUD();
-
-        // 2. Leaflet Map
-        const map = L.map('map').setView([7.1486, 80.7907], 13);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-                const { latitude, longitude } = pos.coords;
-                map.setView([latitude, longitude], 15);
-                L.circleMarker([latitude, longitude], { color: 'red', radius: 8, fillOpacity: 0.8 }).addTo(map);
-                document.getElementById('coords').innerText = `LAT: ${latitude.toFixed(4)} | LON: ${longitude.toFixed(4)}`;
-            });
-        }
-
-        // 3. Simulated Terminal Logs
-        const term = document.getElementById('termOutput');
-        const logs = [
-            ">> Scanning for nearby nodes...",
-            ">> Data packet received from Rikillagaskada",
-            ">> AES-256 Handshake successful",
-            ">> Syncing database: Node_I13",
-            ">> Port 8080 monitoring active",
-            ">> Routing through encrypted VPN layer"
-        ];
-
-        setInterval(() => {
-            const line = document.createElement('div');
-            line.innerText = logs[Math.floor(Math.random() * logs.length)];
-            term.appendChild(line);
-            if (term.childNodes.length > 10) term.removeChild(term.childNodes[0]);
-            term.scrollTop = term.scrollHeight;
-        }, 3000);
     </script>
 </body>
 </html>
