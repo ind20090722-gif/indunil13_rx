@@ -4,234 +4,232 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TERMINAL PORTAL | INDUNIL13_RX</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #ff0000; /* Pure Red */
-            --primary-glow: rgba(255, 0, 0, 0.5);
+            --primary: #ff0000;
+            --primary-glow: rgba(255, 0, 0, 0.6);
             --bg-dark: #000000;
-            --sidebar-bg: rgba(15, 0, 0, 0.9);
-            --text-main: #ffffff;
+            --glass: rgba(15, 0, 0, 0.85);
+            --font-mono: 'Courier New', monospace;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background-color: var(--bg-dark);
-            color: var(--primary);
-            font-family: 'Segoe UI', 'Courier New', monospace;
-            margin: 0;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
+            padding: 15px;
         }
 
-        /* Matrix Background - Red Edition */
+        /* Matrix Background */
         #matrix-canvas {
-            position: absolute;
-            top: 0; left: 0;
-            z-index: -1;
-            opacity: 0.25;
+            position: fixed;
+            top: 0; left: 0; z-index: -1;
+            opacity: 0.3;
         }
 
-        /* Main Portal Frame */
+        /* Main Container */
         .portal-frame {
-            width: 90%;
+            width: 100%;
             max-width: 1100px;
-            height: 600px;
-            background: rgba(5, 0, 0, 0.9);
+            min-height: 600px;
+            background: var(--glass);
             border: 1px solid var(--primary);
             display: flex;
+            flex-direction: row;
             position: relative;
-            box-shadow: 0 0 40px rgba(255, 0, 0, 0.15), inset 0 0 20px rgba(255, 0, 0, 0.05);
             backdrop-filter: blur(15px);
-            animation: fadeIn 1.5s ease-out;
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.2);
+            animation: emerge 1s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes emerge {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         /* Sidebar Section */
         .sidebar {
-            width: 320px;
+            width: 300px;
             border-right: 1px solid var(--primary);
-            background: var(--sidebar-bg);
             padding: 30px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            gap: 30px;
+            background: rgba(0, 0, 0, 0.5);
         }
 
-        .op-identity {
-            text-align: center;
-            border-bottom: 1px solid var(--primary-glow);
-            padding-bottom: 25px;
-        }
-
-        .avatar-glow {
-            width: 100px;
-            height: 100px;
-            border: 2px solid var(--primary);
-            border-radius: 50%;
+        /* RX Animated Spinner */
+        .avatar-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+        }
+
+        .avatar-box {
+            width: 80px;
+            height: 80px;
+            border: 1px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-            color: white;
-            box-shadow: 0 0 25px var(--primary-glow);
+            font-size: 22px;
             background: rgba(255, 0, 0, 0.1);
+            z-index: 2;
             position: relative;
         }
 
-        .avatar-glow::after {
-            content: "";
+        .spinner {
             position: absolute;
-            width: 115%;
-            height: 115%;
-            border: 1px solid var(--primary);
+            width: 100%;
+            height: 100%;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--primary);
+            border-bottom: 2px solid var(--primary);
             border-radius: 50%;
-            border-top-color: transparent;
-            border-bottom-color: transparent;
-            animation: spin 4s linear infinite;
+            animation: rotate-spinner 2.5s linear infinite;
+            box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .spinner::before {
+            content: '';
+            position: absolute;
+            top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 1px dashed var(--primary);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: rotate-spinner 5s linear reverse infinite;
         }
 
-        .status-badge {
-            font-size: 10px;
-            background: var(--primary);
-            color: #fff;
-            padding: 2px 10px;
-            border-radius: 2px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            box-shadow: 0 0 10px var(--primary);
+        @keyframes rotate-spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* Live Metrics */
-        .metrics-panel {
+        /* Decorative Corners */
+        .corner { position: absolute; width: 10px; height: 10px; border: 2px solid var(--primary); }
+        .c-tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+        .c-br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+        /* Metrics Display */
+        .metrics { margin-top: 10px; }
+        .metric-item {
+            font-family: var(--font-mono);
             font-size: 11px;
-            letter-spacing: 1px;
-            color: #bbb;
-        }
-
-        .metric-row {
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
+            color: #888;
             border-bottom: 1px solid rgba(255, 0, 0, 0.1);
             padding-bottom: 4px;
         }
+        .metric-item span:last-child { color: var(--primary); font-weight: bold; }
 
-        .metric-row span:last-child {
-            color: var(--primary);
-            text-shadow: 0 0 8px var(--primary);
-            font-weight: bold;
-        }
-
-        /* Content Section */
+        /* Main Content */
         .content-area {
             flex: 1;
-            padding: 50px;
+            padding: 40px;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             position: relative;
         }
 
-        .sys-header {
-            font-size: 10px;
-            color: #666;
-            margin-bottom: 20px;
-            line-height: 1.5;
-            text-transform: uppercase;
-        }
-
-        .brand h1 {
-            font-size: 4.8rem;
-            margin: 0;
-            letter-spacing: 15px;
+        .brand-section h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            letter-spacing: 12px;
+            color: #fff;
+            text-shadow: 0 0 25px var(--primary-glow);
+            line-height: 1;
             font-weight: 900;
-            color: white;
-            text-shadow: 0 0 20px var(--primary-glow);
         }
 
-        .brand p {
-            font-size: 14px;
+        .brand-section p {
             color: var(--primary);
-            letter-spacing: 5px;
-            margin-top: -5px;
-            text-transform: uppercase;
+            letter-spacing: 6px;
             font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 45px;
+            font-size: 13px;
         }
 
-        /* Action Buttons */
+        /* Action Hub Buttons */
         .nav-hub {
-            margin-top: 60px;
-            display: flex;
-            gap: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            width: 100%;
         }
 
         .btn-cyber {
-            width: 220px;
-            height: 55px;
+            padding: 16px;
             background: transparent;
             border: 1px solid var(--primary);
-            color: white;
+            color: #fff;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 2px;
             cursor: pointer;
+            transition: 0.4s;
             position: relative;
             overflow: hidden;
-            transition: 0.3s;
-            clip-path: polygon(0 0, 90% 0, 100% 30%, 100% 100%, 10% 100%, 0 70%);
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-
-        .btn-cyber::before {
-            content: "";
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.4), transparent);
-            transition: 0.6s;
-        }
-
-        .btn-cyber:hover::before { left: 100%; }
 
         .btn-cyber:hover {
             background: var(--primary);
-            color: black;
-            box-shadow: 0 0 30px var(--primary);
-            transform: scale(1.05);
+            color: #000;
+            box-shadow: 0 0 35px var(--primary);
+            transform: translateY(-2px);
         }
 
-        /* Decorations */
-        .frame-corner {
-            position: absolute;
-            width: 35px;
-            height: 35px;
-            border: 2px solid var(--primary);
-        }
-        .tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
-        .tr { top: -2px; right: -2px; border-left: 0; border-bottom: 0; }
-        .bl { bottom: -2px; left: -2px; border-right: 0; border-top: 0; }
-        .br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
-
+        /* Footer Info */
         footer {
             margin-top: auto;
-            display: flex;
-            justify-content: space-between;
             font-size: 10px;
             color: #444;
-            border-top: 1px solid rgba(255, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255,0,0,0.1);
             padding-top: 20px;
         }
 
+        /* Responsive Breakpoints */
+        @media (max-width: 850px) {
+            .portal-frame {
+                flex-direction: column;
+                min-height: auto;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--primary);
+                padding: 25px;
+            }
+            .content-area {
+                padding: 40px 20px;
+                text-align: center;
+            }
+            .nav-hub {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -239,100 +237,100 @@
     <canvas id="matrix-canvas"></canvas>
 
     <div class="portal-frame">
-        <div class="frame-corner tl"></div>
-        <div class="frame-corner tr"></div>
-        <div class="frame-corner bl"></div>
-        <div class="frame-corner br"></div>
-
         <aside class="sidebar">
             <div class="op-identity">
-                <div class="avatar-glow">RX</div>
-                <h3 style="margin: 10px 0 5px; letter-spacing: 2px; color: white;">INDUNIL13_RX</h3>
-                <span class="status-badge">RED COMMAND ACCESS</span>
+                <div class="avatar-wrapper">
+                    <div class="spinner"></div>
+                    <div class="avatar-box">
+                        <div class="corner c-tl"></div>
+                        <div class="corner c-br"></div>
+                        RX
+                    </div>
+                </div>
+                <h2 style="font-size: 18px; letter-spacing: 2px;">INDUNIL13_RX</h2>
+                <p style="font-size: 10px; color: var(--primary); margin-top: 8px;">[ RED COMMAND ACCESS ]</p>
             </div>
 
-            <div class="metrics-panel">
-                <div class="metric-row"><span>SYSTEM_DATE</span><span id="date">--/--/----</span></div>
-                <div class="metric-row"><span>SYSTEM_TIME</span><span id="clock">00:00:00</span></div>
-                <div class="metric-row"><span>UPLINK</span><span>SECURE</span></div>
-                <div class="metric-row"><span>THREAT_LEVEL</span><span style="color: #ff0000;">NULL</span></div>
-                <div class="metric-row"><span>NODE</span><span>RIKILLAGASKADA_01</span></div>
+            <div class="metrics">
+                <div class="metric-item"><span>SYS_DATE</span><span id="date">--.--.----</span></div>
+                <div class="metric-item"><span>SYS_TIME</span><span id="clock">00:00:00</span></div>
+                <div class="metric-item"><span>LOCAL_NODE</span><span>RIKILLAGASKADA_01</span></div>
+                <div class="metric-item"><span>ENC_LEVEL</span><span>AES_256_ULTRA</span></div>
             </div>
 
-            <div style="font-size: 9px; color: #555; line-height: 1.6;">
-                > BOOT_MODE: CRYPT_SECURE<br>
-                > AUTH_TYPE: AES_256_MULTI<br>
-                > STATUS: STANDBY...
+            <div style="font-size: 9px; color: #555; font-family: var(--font-mono); line-height: 1.6;">
+                > BOOT_SEQUENCE: COMPLETED<br>
+                > FIREWALL_STATUS: ACTIVE<br>
+                > WAITING_FOR_OPERATOR_INPUT...
             </div>
         </aside>
 
         <main class="content-area">
-            <div class="sys-header">
-                >> [ LOGGING STARTED... OK ]<br>
-                >> [ FIREWALL BYPASS... ACTIVE ]<br>
-                >> [ RED_NODE ESTABLISHED ]
-            </div>
-
-            <div class="brand">
+            <div class="brand-section">
+                <p style="font-size: 11px;">Restricted Access Gateway</p>
                 <h1>PERSWEB</h1>
-                <p>Advanced Personal Gateway</p>
+                <p>Advanced Cyber Intelligence Node</p>
             </div>
 
             <div class="nav-hub">
-                <button class="btn-cyber" onclick="location.href='login.html'">Secure Login</button>
-                <button class="btn-cyber" onclick="location.href='register.html'">New Database</button>
+                <button class="btn-cyber" onclick="location.href='login.html'">
+                    <i class="fas fa-sign-in-alt"></i> Secure Login
+                </button>
+                <button class="btn-cyber" onclick="location.href='register.html'">
+                    <i class="fas fa-user-plus"></i> New Database
+                </button>
             </div>
 
             <footer>
-                <span>DESIGNED BY INDUNIL13_RX // 2026</span>
-                <span style="color: var(--primary);">RESTRICTED ACCESS AREA</span>
+                <span>PORTAL VERSION 113.V</span>
+                <span style="color: var(--primary);">© 2026 INDUNIL_RX</span>
             </footer>
         </main>
     </div>
 
     <script>
-        // Matrix Rain Animation (Red Version)
+        // Matrix Rain Animation
         const canvas = document.getElementById('matrix-canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
 
-        const alphabet = "0101010101ABCDEF";
-        const fontSize = 12;
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.onresize = resizeCanvas;
+        resizeCanvas();
+
+        const chars = "0101010101ABCDEF";
+        const fontSize = 14;
         const columns = canvas.width / fontSize;
-        const drops = Array.from({ length: columns }).fill(1);
+        const drops = Array(Math.floor(columns)).fill(1);
 
         function drawMatrix() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#ff0000"; // Red Matrix
+            ctx.fillStyle = "#ff0000"; // Red text
             ctx.font = fontSize + "px monospace";
 
             for (let i = 0; i < drops.length; i++) {
-                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
                 drops[i]++;
             }
         }
         setInterval(drawMatrix, 50);
 
         // Real-time Clock and Date
-        function updateClock() {
+        function updateHUD() {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
-            const dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '.');
-            
-            document.getElementById('clock').innerText = timeStr;
-            document.getElementById('date').innerText = dateStr;
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+            document.getElementById('date').innerText = now.toLocaleDateString('en-GB').replace(/\//g, '.');
         }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+        setInterval(updateHUD, 1000);
+        updateHUD();
     </script>
 </body>
 </html>
