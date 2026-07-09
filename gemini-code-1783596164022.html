@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iRAT PAYMENT - Professional POS System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --success-color: #25D366;
+            --danger-color: #e53e3e;
+            --bg-color: #f7fafc;
+            --text-color: #2d3748;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            max-width: 480px;
+            width: 100%;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-weight: 700;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+
+        .dynamic-field {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        .charge-badge {
+            font-size: 13px;
+            color: var(--danger-color);
+            margin-top: 5px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .total-panel {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 20px;
+            border: 1px dashed var(--secondary-color);
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-whatsapp {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-whatsapp:hover { background-color: #128C7E; }
+
+        .btn-pdf {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-pdf:hover { background-color: #1a365d; }
+
+        /* Hidden PDF Template Container */
+        #receipt-pdf-template {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Styling for the PDF Generation Visual */
+        .pdf-preview {
+            width: 100%;
+            padding: 40px;
+            background: white;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>iRAT PAYMENT</h2>
+    
+    <div class="form-group">
+        <label for="whatsappNo">Customer WhatsApp No (e.g., 94771234567)</label>
+        <input type="text" id="whatsappNo" placeholder="94771234567" required>
+    </div>
+
+    <div class="form-group">
+        <label for="category">Select Category</label>
+        <select id="category" onchange="updateServiceOptions()">
+            <option value="Reload">Reload</option>
+            <option value="TV Bill">TV Bill</option>
+            <option value="Broadband">Home Broadband / Land Phone / Fibre</option>
+            <option value="Bill">Bill (Utility Bills)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="serviceProvider">Select Service Provider</label>
+        <select id="serviceProvider" onchange="checkServiceCharge()"></select>
+    </div>
+
+    <div id="otherCompanyGroup" class="form-group dynamic-field">
+        <label for="otherCompanyName">Company Name (for Other Bill)</label>
+        <input type="text" id="otherCompanyName" placeholder="Enter Company Name">
+    </div>
+
+    <div class="form-group">
+        <label id="accountLabel" for="accountNo">Mobile Number</label>
+        <input type="text" id="accountNo" placeholder="Enter number" required>
+    </div>
+
+    <div class="form-group">
+        <label for="amount">Amount (Rs.)</label>
+        <input type="number" id="amount" placeholder="0.00" oninput="calculateReceipt()" required>
+        <div id="chargeNotice" class="charge-badge">* Rs. 20.00 Service Charge will be added.</div>
+    </div>
+
+    <div class="total-panel" id="totalDisplay">
+        Total Payable: Rs. 0.00
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-whatsapp" onclick="sendWhatsAppText()">
+            💬 Send Text via WhatsApp
+        </button>
+        <button class="btn-pdf" onclick="generatePDFReceipt()">
+            📄 Download Professional PDF
+        </button>
+    </div>
+</div>
+
+<div id="receipt-pdf-template">
+    <div class="pdf-preview" style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <div style="border-bottom: 3px solid #1a365d; padding-bottom: 10px; margin-bottom: 20px;">
+            <h1 style="color: #1a365d; margin: 0; font-size: 28px; letter-spacing: 1px;">iRAT PAYMENT</h1>
+            <p style="margin: 5px 0 0 0; color: #718096; font-size: 14px; text-transform: uppercase; font-weight: bold;">Official Payment Receipt</p>
+        </div>
+        
+        <table style="width: 100%; margin-bottom: 25px; font-size: 14px; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 5px 0; font-weight: bold; color: #4a5568; width: 25%;">Receipt No:</td>
+                <td style="padding: 5px 0; color: #2d3748;" id="pdf-receipt-no"></td>
+                <td style="padding: 5px 0; font-weight: bold; color: #4a5568; width: 25%;">Date:</td>
+                <td style="padding: 5px 0; color: #2d3748;" id="pdf-date"></td>
+            </tr>
+            <tr>
+                <td style="padding: 5px 0; font-weight: bold; color: #4a5568;">Time:</td>
+                <td style="padding: 5px 0; color: #2d3748;" id="pdf-time"></td>
+                <td style="padding: 5px 0; font-weight: bold; color: #4a5568;">Status:</td>
+                <td style="padding: 5px 0;"><span style="background-color: #c6f6d5; color: #22543d; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 12px;">PAID</span></td>
+            </tr>
+            <tr>
+                <td style="padding: 5px 0; font-weight: bold; color: #4a5568;">Customer WA:</td>
+                <td style="padding: 5px 0; color: #2d3748;" id="pdf-customer-wa" colspan="3"></td>
+            </tr>
+        </table>
+
+        <h3 style="color: #1a365d; border-left: 4px solid #2b6cb0; padding-left: 8px; margin-bottom: 15px;">Payment Details</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 14px;">
+            <thead>
+                <tr style="background-color: #2b6cb0; color: white;">
+                    <th style="padding: 10px; text-align: left;">Description</th>
+                    <th style="padding: 10px; text-align: left;">Account / Mobile No</th>
+                    <th style="padding: 10px; text-align: right;">Amount (LKR)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;" id="pdf-desc"></td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;" id="pdf-acc-no"></td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right;" id="pdf-base-amount"></td>
+                </tr>
+                <tr id="pdf-charge-row">
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; color: #e53e3e;">Service Charge</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">-</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #e53e3e;">Rs. 20.00</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="width: 40%; margin-left: auto; margin-top: 20px; font-size: 15px;">
+            <table style="width: 100%;">
+                <tr style="font-weight: bold; background-color: #edf2f7; color: #1a365d; font-size: 16px;">
+                    <td style="padding: 8px;">Total Paid:</td>
+                    <td style="padding: 8px; text-align: right;" id="pdf-total-amount"></td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="margin-top: 40px; padding: 10px; background: #f7fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
+            <p style="margin: 0; font-size: 13px; color: #4a5568;">Payment Method: <strong>Sampath Bank Vishwa</strong></p>
+        </div>
+
+        <div style="margin-top: 60px; text-align: center; color: #a0aec0; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+            Thank you for your business!<br>
+            <span style="font-size: 10px;">This is an automated professional receipt generated by iRAT PAYMENT.</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // දත්ත ගොනු (Service Data)
+    const services = {
+        "Reload": ["Dialog", "SLTmobitel", "Hutch", "Airtel"],
+        "TV Bill": ["Dialog TV", "Peo TV"],
+        "Broadband": ["Dialog", "SLT"],
+        "Bill": ["Electricity Distribution Lanka (Private) Limited", "National water supply and drainage board", "Lanka Electricity Company (Pvt) Ltd", "Other*"]
+    };
+
+    function updateServiceOptions() {
+        const category = document.getElementById("category").value;
+        const providerSelect = document.getElementById("serviceProvider");
+        const accountLabel = document.getElementById("accountLabel");
+        
+        providerSelect.innerHTML = "";
+        services[category].forEach(prov => {
+            let opt = document.createElement("option");
+            opt.value = prov;
+            opt.innerText = prov;
+            providerSelect.appendChild(opt);
+        });
+
+        // ලේබල් යාවත්කාලීන කිරීම
+        if (category === "Reload") {
+            accountLabel.innerText = "Mobile Number";
+        } else {
+            accountLabel.innerText = "Account Number / Bill ID";
+        }
+
+        checkServiceCharge();
+    }
+
+    function checkServiceCharge() {
+        const category = document.getElementById("category").value;
+        const provider = document.getElementById("serviceProvider").value;
+        const otherField = document.getElementById("otherCompanyGroup");
+        const chargeNotice = document.getElementById("chargeNotice");
+
+        // Other option එක තේරූ විට text field එක පෙන්වීම
+        if (provider === "Other*") {
+            otherField.style.display = "block";
+        } else {
+            otherField.style.display = "none";
+        }
+
+        // රු. 20 අමතර ගාස්තුව තීරණය කිරීම
+        if (category === "Bill") {
+            chargeNotice.style.display = "block";
+        } else {
+            chargeNotice.style.display = "none";
+        }
+
+        calculateReceipt();
+    }
+
+    function calculateReceipt() {
+        const category = document.getElementById("category").value;
+        const amountInput = parseFloat(document.getElementById("amount").value) || 0;
+        let serviceCharge = (category === "Bill" && amountInput > 0) ? 20 : 0;
+        let total = amountInput + serviceCharge;
+
+        document.getElementById("totalDisplay").innerText = `Total Payable: Rs. ${total.toFixed(2)}`;
+        return { base: amountInput, charge: serviceCharge, total: total };
+    }
+
+    function getFormValues() {
+        const now = new Date();
+        const provider = document.getElementById("serviceProvider").value;
+        const otherName = document.getElementById("otherCompanyName").value.trim();
+        
+        return {
+            whatsapp: document.getElementById("whatsappNo").value.trim(),
+            service: (provider === "Other*") ? (otherName || "Custom Bill") : provider,
+            account: document.getElementById("accountNo").value.trim(),
+            receiptNo: "IRAT-" + now.getFullYear() + "-" + Math.floor(100000 + Math.random() * 900000),
+            date: now.toLocaleDateString(),
+            time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            calc: calculateReceipt()
+        };
+    }
+
+    // 1. WhatsApp Text Message එකක් යැවීම
+    function sendWhatsAppText() {
+        const data = getFormValues();
+
+        if (!data.whatsapp || !data.account || data.calc.base <= 0) {
+            alert("කරුණාකර සියලු විස්තර නිවැරදිව ඇතුළත් කරන්න.");
+            return;
+        }
+
+        let msg = `*🧾 iRAT PAYMENT - OFFICIAL RECEIPT*\n`;
+        msg += `--------------------------------------------------\n`;
+        msg += `*Receipt No:* #${data.receiptNo}\n`;
+        msg += `*Date:* ${data.date} | *Time:* ${data.time}\n`;
+        msg += `*Status:* SUCCESSFUL (PAID)\n\n`;
+        msg += `*[PAYMENT DETAILS]*\n`;
+        msg += `• *Service:* ${data.service}\n`;
+        msg += `• *A/C or Mobile:* ${data.account}\n`;
+        msg += `• *Bill Amount:* Rs. ${data.calc.base.toFixed(2)}\n`;
+        if (data.calc.charge > 0) {
+            msg += `• *Service Charge:* Rs. ${data.calc.charge.toFixed(2)}\n`;
+        }
+        msg += `• *TOTAL PAID:* Rs. ${data.calc.total.toFixed(2)}\n`;
+        msg += `--------------------------------------------------\n`;
+        msg += `💳 _Paid via Sampath Bank Vishwa_\n\n`;
+        msg += `Thank you for your payment! 🙏✨`;
+
+        window.open(`https://wa.me/${data.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // 2. Professional PDF එකක් සාදා බාගත කිරීම
+    function generatePDFReceipt() {
+        const data = getFormValues();
+
+        if (!data.whatsapp || !data.account || data.calc.base <= 0) {
+            alert("කරුණාකර සියලු විස්තර නිවැරදිව ඇතුළත් කරන්න.");
+            return;
+        }
+
+        // PDF Template එකට දත්ත ඇතුළත් කිරීම
+        document.getElementById("pdf-receipt-no").innerText = "#" + data.receiptNo;
+        document.getElementById("pdf-date").innerText = data.date;
+        document.getElementById("pdf-time").innerText = data.time;
+        document.getElementById("pdf-customer-wa").innerText = "+" + data.whatsapp;
+        document.getElementById("pdf-desc").innerText = data.service;
+        document.getElementById("pdf-acc-no").innerText = data.account;
+        document.getElementById("pdf-base-amount").innerText = "Rs. " + data.calc.base.toFixed(2);
+        document.getElementById("pdf-total-amount").innerText = "Rs. " + data.calc.total.toFixed(2);
+
+        // Service charge පේළිය පාලනය කිරීම
+        if (data.calc.charge > 0) {
+            document.getElementById("pdf-charge-row").style.display = "table-row";
+        } else {
+            document.getElementById("pdf-charge-row").style.display = "none";
+        }
+
+        // PDF එක Generate කිරීමේ සෙටින්ග්ස්
+        const element = document.querySelector("#receipt-pdf-template .pdf-preview");
+        const opt = {
+            margin:       10,
+            filename:     `Receipt_${data.receiptNo}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // PDF එක Download කරවීම
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // ආරම්භයේදීම Dropdown එක සක්‍රීය කිරීමට
+    updateServiceOptions();
+</script>
+
+</body>
+</html>
